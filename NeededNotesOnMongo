@@ -1,0 +1,8 @@
+ps wuax | grep mongo
+You should see something that looks like this
+
+User           31936   0.5 0.4 2719784 35624   ?? S     7:34pm   0:09.98 mongod
+User           31945   0.0 0.0 2423368   184 s000 R+   8:24pm   0:00.00 grep mongo
+Now enter the kill command for the mongod instance (31936 in this case):
+
+kill 31936

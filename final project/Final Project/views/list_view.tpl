@@ -6,7 +6,7 @@ Model List View
 <table border="1">
 %for row in rows:
 	<tr>
-	<!--td>#{{row[0]}}</td-->
+	<td>#{{row[0]}}</td>
 	<td><a href="/edit/{{row[0]}}">{{row[1]}}</a></td>
 	<td><a href="/edit/{{row[0]}}">{{row[2]}}</a></td>
 	<td><a href="/delete/{{row[0]}}"><img src="/static/trash.png" style="width:16px;height:16px;border:0;"/></a></td>
@@ -19,7 +19,3 @@ Model List View
 	To be done: <input name="task" type="text" />
 	<input value="Save new item..." type="submit" />
 </form>
-
-
-<p> Number of present "Not Done"  Items is: 5 </p>
-<p> Number of Present "Done" items is: 5 </p>

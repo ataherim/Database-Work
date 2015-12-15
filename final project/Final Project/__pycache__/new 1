@@ -1,0 +1,201 @@
+from bottle import default_app, run, route
+from bottle import get, put, post, request, template
+from bottle import static_file
+
+from models import *
+
+@get('/')
+@get('/index')
+@get('/index/<status:int>')
+def get_list(status=-1):
+    if (status >= 0):
+        query = airline.select().where(airline.status == status).order_by(airline.task.asc())
+    else:
+        query = airline.select().order_by(airline.task.asc())
+    result = []
+    for airline in query:
+        result.append((airline.id,airline.name,airline.p_class,airline.status))
+    return template('index', rows=result)
+
+@get('/new')
+def get_new():
+    return '''
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flight_Reservation</title>
+
+<!-- Bootstrap -->
+<link rel="stylesheet" href="/view/css/bootstrap.css">
+
+<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+<!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+
+  <div class="container">
+<div class="row">
+    <div class="col-xs-7">
+        <div class="media">
+          <div class="media-left"> <a href="#"> <img class="media-object img-rounded" src="/view/img/airplane_2.svg" alt="..."> </a> </div>
+          <div class="media-body">
+            <h2 class="media-heading">Welcome to Ali Taheri &nbsp; &nbsp; &nbsp; Flight Reservation &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; System</h2>
+            This Web Site is made To Provide The Easiest Way To Book A Reservation Over Hundred Airline Componies And Airport To comfort You To Enjoy The Simple Way of World Wide Web Experience! </div>
+        </div>
+      </div>
+      <div class="alert-info">
+        <div class="row">
+          <h4 class="col-lg-4">Phone : 123-456-7890</h4>
+          <h4 class="alert-info col-lg-4"><span class="glyphicon glyphicon-envelope" aria-hidden="true"></span> : ali@kent.edu</h4>
+</div>
+</div>
+    </div>
+<div class="col-sm-8 col-lg-12"><strong class="btn-primary" id="Header" name="Header">Customers</strong> </div>
+<div class="bg-primary" id="form_div">
+    <form id="form1" name="form1" method="post" action="/edit/{{id}}">
+        <br>
+        <br>
+<br>
+<label for="textfield3">Name: </label>
+<input type="text" name="name" maxlength="100" value="name"id="name">
+      <label for="textfield2">Address: </label>
+        <input type="text" name="address" maxlength="100" value="address" id="address">
+        <label for="select">Gender: </label>
+        <select name="select" id="select" >
+          <option value="F" id="genderF">Female</option>
+          <option value="M" id="genderM">Male</option>
+        </select>
+        <br>
+<label for="select2">Airline Company Name:</label>
+
+        <select name="select2" id="select2">
+        %for row in rows:
+       <option > {{row[3]}}</option>
+        %end
+        </select>
+<label for="select3">Class: </label>
+        <select name="select4" id="select4">
+                %for row in rows:
+       <option> {{row[4]}}</option>
+        %end
+        </select>
+<label for="select3">Airport Name:</label>
+<select name="select3" id="select3">
+        %for row in rows:
+       <option> {{row[5]}}</option>
+        %end
+</select>
+<br>
+<label for="select3">Flight Number:</label>
+<select name="select4" id="select5">
+        %for row in rows:
+       <option> {{row[6]}}</option>
+        %end
+</select>
+<label for="select3">Gate:</label>
+<select name="select4" id="select6">
+        %for row in rows:
+       <option> {{row[7]}}</option>
+        %end
+</select>
+<br>
+<br>
+<input name="insert_btn" type="button" id="insert_btn" title="Insert" value="Insert">
+<br>
+<br>
+&nbsp;
+    </form>
+</div>
+<div class="col-sm-8 col-lg-12"><strong class="btn-primary" id="Header2" name="Header">View</strong></div>
+<div class="bg-primary" id="form_div2">
+  <div id="div_view" name="view1">
+  %for row in rows:
+    <br>
+    <br>
+    <br>
+    <label for="textfield4">Name: </label>
+    <strong>&nbsp;{{row[0]}}</strong>
+    <label for="textfield3">Address: </label>
+    <strong>&nbsp;{{row[1]}}</strong>
+    <label for="select4">Gender: </label>
+    <strong>&nbsp;{{row[2]}}</strong><br>
+    <label for="select5">Airline Company Name:</label>
+    <strong>&nbsp;{{row[3]}}</strong>
+    <label for="select6">Class: </label>
+    <strong>&nbsp;{{row[4]}}</strong>
+    <label for="select6">Airport Name:</label>
+    <strong>&nbsp;{{row[5]}}</strong><br>
+    <label for="select6">Flight Number:</label>
+    <strong>&nbsp;{{row[6]}}</strong>
+    <label for="select6">Gate:</label>
+    <strong>&nbsp;{{row[7]}}</strong><br>
+    <br>
+<br>
+    <br>
+    &nbsp;
+    %end
+  </div>
+</div>
+</div>
+<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+<script src="file:///C|/Users/Betis/Documents/Database/js/jquery-1.11.2.min.js"></script>
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="file:///C|/Users/Betis/Documents/Database/js/bootstrap.min.js"></script>
+</body>
+</html>
+
+    '''
+
+@post('/new')
+def post_new():
+    name = request.forms.get('name', '').strip()
+    airline = airline.create(name = name, status = 1)
+    return get_list()
+
+@get('/edit/<id:int>')
+def get_edit(id):
+    airline = airline.get(id=id)
+    return template('index', id=id, name=airline.name, status=airline.status)
+
+@post('/edit/<id:int>')
+def post_edit(id):
+    name = request.forms.get('name', '').strip()
+    status = request.GET.get('status','').strip()
+    if status == 'open':
+        status = 1
+    else:
+        status = 0
+    airline = airline.get(id=id)
+    airline.name = name
+    airline.status = status
+    airline.save()
+    return get_list()
+
+@get('/delete/<id:int>')
+def confirm_delete_item(id):
+    airline = airline.get(id=id)
+    return template('index', id=id, name=airline.name, status=airline.status)
+
+@post('/delete/<id:int>')
+def delete_item(id):
+    airline = airline.get(id=id)
+    airline.delete_instance()
+    return get_list()
+
+@get('/static/<filename>')
+def server_static(filename):
+    print(filename)
+    return static_file(filename, root='static')
+
+if __name__ == "__main__":
+    run(reloader = True, host="0.0.0.0")
+else:
+    application = default_app()
+
